@@ -13,9 +13,6 @@ services:
     env_file:
       - .env
       - .env.data
-    volumes:
-      - ./frontend:/usr/src/app
-      - /usr/src/app/node_modules
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:${FRONTEND_PORT}/"]
       interval: 2s
@@ -38,9 +35,7 @@ services:
       - .env.data
     image: ghcr.io/himmelforce/hims-api:latest
     volumes:
-      - ./api:/usr/src/app
       - ./uploads:/usr/src/app/uploads
-      - /usr/src/app/node_modules
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:${API_PORT}/"]
       interval: 2s
@@ -104,8 +99,6 @@ services:
       - .env
       - .env.data
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/sites-enabled/default.${SECURITY_MODE}.conf:/etc/nginx/conf.d/default.conf.template:ro
       - /etc/letsencrypt/live/${HOST}/fullchain.pem:/etc/letsencrypt/live/${HOST}/fullchain.pem:ro
       - /etc/letsencrypt/live/${HOST}/privkey.pem:/etc/letsencrypt/live/${HOST}/privkey.pem:ro
     networks:
@@ -113,7 +106,6 @@ services:
     depends_on:
       frontend:
         condition: service_healthy
-
 
 volumes:
   mongo-data:
