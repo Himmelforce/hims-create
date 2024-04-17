@@ -29,19 +29,17 @@ read SECRET_KEY_USER
 echo "[API] Enter admin-user-secret-key (example: 560148955817caee2be1d1a5070201aw):"
 read SECRET_KEY
 
-echo "[ADMIN] Enter database-admin-username (example: root):"
+echo "[ADMIN] Enter admin-username (example: root):"
 read INIT_ADMIN_USERNAME
 
-echo "[ADMIN] Enter database-admin-password (example: oYeY26!nz19oYu@Q4oyb%rV):"
+echo "[ADMIN] Enter admin-password (example: oYeY26!nz19oYu@Q4oyb%rV):"
 read INIT_ADMIN_PASSWORD
 
-echo "[DATABASE] Enter mongo-username (example: root):"
-read MONGO_USERNAME
 
-echo "[DATABASE] Enter mongo-password (example: oYeY26!nz19oYu@Q4oyb%rV):"
+echo "[DATABASE] Enter mongo root password (example: oYeY26!nz19oYu@Q4oyb%rV):"
 read MONGO_PASSWORD
 
-echo "[DATABASE] Enter redis-password (example: oYeY26!nz19oYu@Q4oyb%rV):"
+echo "[DATABASE] Enter redis root password (example: oYeY26!nz19oYu@Q4oyb%rV):"
 read REDIS_PASSWORD
 
 echo "[SMTP] Enter smtp-service (example: Gmail):"
