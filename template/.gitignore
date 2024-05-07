@@ -1,0 +1,6 @@
+mongo-data
+uploads
+cache
+.VSCodeCounter
+.vscode
+.env.data

@@ -1,0 +1,32 @@
+{
+  "name": "create-hims",
+  "version": "0.0.11",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "bin": {
+    "create-hims": "./index.js"
+  },
+  "engines": {
+    "node": "^18.0.0 || >=20.0.0"
+  },
+  "files": [
+    "index.js",
+    "template"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Himmelforce/HiMS.git"
+  },
+  "author": "Himmelforce",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Himmelforce/HiMS/issues"
+  },
+  "homepage": "https://github.com/Himmelforce/HiMS#readme",
+  "dependencies": {
+    "kolorist": "^1.8.0",
+    "minimist": "^1.2.8",
+    "prompts": "^2.4.0"
+  }
+}
