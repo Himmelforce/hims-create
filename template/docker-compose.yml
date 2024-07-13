@@ -41,7 +41,7 @@ services:
     image: ghcr.io/himmelforce/hims-admin:latest
     env_file:
       - .env
-      - .env.data
+      - .hims.env
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:${ADMIN_SERVICE_PORT}/"]
       interval: 2s
@@ -61,7 +61,7 @@ services:
         published: ${API_PORT}
     env_file:
       - .env
-      - .env.data
+      - .hims.env
     image: ghcr.io/himmelforce/hims-api:latest
     volumes:
       - ./uploads:/usr/src/app/uploads
@@ -126,7 +126,7 @@ services:
     image: ghcr.io/himmelforce/hims-nginx:latest
     env_file:
       - .env
-      - .env.data
+      - .hims.env
     volumes:
       - /etc/letsencrypt/live/${HOST}/fullchain.pem:/etc/letsencrypt/live/${HOST}/fullchain.pem:ro
       - /etc/letsencrypt/live/${HOST}/privkey.pem:/etc/letsencrypt/live/${HOST}/privkey.pem:ro
