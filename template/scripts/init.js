@@ -43,6 +43,8 @@ const init_process = async flags => {
       config.security_mode = "insecure"
       config.host = "localhost"
 
+      config.testing_uri = `http://${config.host}:3002`
+
       break
     default:
       config.project_name = (await input(colorize("Enter project name: ", "blue"))).trim().replace(/\s+/g, "-")
