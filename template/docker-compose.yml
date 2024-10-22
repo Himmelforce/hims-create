@@ -61,7 +61,7 @@ services:
     volumes:
       - ./uploads:/usr/src/app/uploads
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${API_PORT}/"]
+      test: ["CMD", "curl", "-f", "http://localhost:${API_PORT}/api/"]
       interval: 2s
       timeout: 10s
       retries: 20
