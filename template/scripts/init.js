@@ -4,6 +4,10 @@ const fs = require("fs")
 const colorize = require(`../lib/colorize`)
 const input = require(`../lib/input`).input
 
+const port = process.env.API_PORT;
+
+console.log(port);
+
 module.exports = async flags => {
   console.log("\n" + colorize("Welcome to the HiMS development version setup!", "green") + "\n")
 
@@ -23,7 +27,7 @@ const init_process = async flags => {
       config.project_name = "HiMS"
       config.project_description = "HiMS is a simple CMS for managing your content!"
 
-      config.enviroment = "dev"
+      config.enviroment = "development"
 
       config.admin_init_user = "admin"
       config.admin_init_password = "admin"

@@ -36,7 +36,7 @@ services:
     environment:
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
-    image: ghcr.io/himmelforce/hims-admin:latest
+    image: himmelforce/hims-admin:latest
     env_file:
       - .env
       - .hims.env
@@ -60,7 +60,7 @@ services:
     env_file:
       - .env
       - .hims.env
-    image: ghcr.io/himmelforce/hims-api:latest
+    image: himmelforce/hims-api:latest
     volumes:
       - ./uploads:/usr/src/app/uploads
     healthcheck:
