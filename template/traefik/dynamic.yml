@@ -1,0 +1,45 @@
+http:
+  routers:
+    api-router:
+      rule: "PathPrefix(`/api`)"
+      service: api-service
+      entryPoints:
+        - web
+
+    admin-router:
+      rule: "PathPrefix(`/admin`)"
+      service: admin-service
+      priority: 2
+      entryPoints:
+        - web
+
+    frontend-router:
+      rule: "PathPrefix(`/`)"
+      service: frontend-service
+      priority: 1
+      entryPoints:
+        - web
+      middlewares:
+        - frontend-strip-prefix
+
+  middlewares:
+    frontend-strip-prefix:
+      stripPrefix:
+        prefixes:
+          - "/admin"
+
+  services:
+    api-service:
+      loadBalancer:
+        servers:
+          - url: "http://api:3002"
+
+    admin-service:
+      loadBalancer:
+        servers:
+          - url: "http://admin:3001"
+
+    frontend-service:
+      loadBalancer:
+        servers:
+          - url: "http://frontend:3000"

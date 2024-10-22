@@ -29,14 +29,11 @@ services:
       - default
 
   admin:
+    image: himmelforce/hims-admin:latest
     container_name: hims-admin
     ports:
       - target: ${ADMIN_SERVICE_PORT}
         published: ${ADMIN_SERVICE_PORT}
-    environment:
-      - CHOKIDAR_USEPOLLING=true
-      - WATCHPACK_POLLING=true
-    image: himmelforce/hims-admin:latest
     env_file:
       - .env
       - .hims.env
@@ -53,6 +50,7 @@ services:
       - default
 
   api:
+    image: himmelforce/hims-api:latest
     container_name: hims-api
     ports:
       - target: ${API_PORT}
@@ -60,7 +58,6 @@ services:
     env_file:
       - .env
       - .hims.env
-    image: himmelforce/hims-api:latest
     volumes:
       - ./uploads:/usr/src/app/uploads
     healthcheck:
@@ -114,24 +111,26 @@ services:
     networks:
       - default
 
-  nginx:
-    container_name: hims-nginx
+  traefik:
+    image: traefik:${TRAEFIK_VERSION}
+    container_name: hims-traefik
     ports:
       - target: 80
         published: 80
       - target: 443
         published: 443
-    image: ghcr.io/himmelforce/hims-nginx:latest
-    env_file:
-      - .env
-      - .hims.env
+      - target: 8080
+        published: 8080
     volumes:
-      - /etc/letsencrypt/live/${HOST}/fullchain.pem:/etc/letsencrypt/live/${HOST}/fullchain.pem:ro
-      - /etc/letsencrypt/live/${HOST}/privkey.pem:/etc/letsencrypt/live/${HOST}/privkey.pem:ro
-    networks:
-      - default
+      - "./traefik/traefik.yml:/etc/traefik/traefik.yml"
+      - "./traefik/dynamic.yml:/etc/traefik/dynamic.yml"
+      - "/var/run/docker.sock:/var/run/docker.sock"
     depends_on:
+      api:
+        condition: service_healthy
       frontend:
+        condition: service_healthy
+      admin:
         condition: service_healthy
 
 volumes:
