@@ -7,7 +7,11 @@ pipeline {
             steps {
                 sh 'docker ps -a | grep hims-demo && docker stop hims-demo || true'
                 sh 'docker ps -a | grep hims-demo && docker rm hims-demo || true'
-                sh 'docker run --privileged -d --name hims-demo docker:dind --label "traefik.enable=true" --label "traefik.http.routers.hims-demo.rule=Host(`hims-demo.himmelforce.com`)"'
+                sh 'docker run --privileged -d \
+                    --name hims-demo \
+                    --label "traefik.enable=true" \
+                    --label "traefik.http.routers.hims-demo.rule=Host(`hims-demo.himmelforce.com`)" \
+                    docker:dind'
                 sh 'docker exec hims-demo apk add --no-cache nodejs npm docker-compose'
             }
         }
