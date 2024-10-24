@@ -13,7 +13,7 @@ pipeline {
         }
         stage('Build hims-demo') {
             steps {
-                sh 'docker exec hims-demo sh -c "mkdir /app && cd /app && echo "hims" | npm create hims@latest && npm link && hims init --default && hims start"'
+                sh 'docker exec hims-demo sh -c "mkdir /app && cd /app && echo "hims" | npm create hims@latest && cd hims && npm link && hims init --default && hims start"'
             }
         }
     }
