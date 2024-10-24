@@ -15,7 +15,7 @@ pipeline {
                     if docker exec hims-demo test -d /app/hims; then
                         docker exec hims-demo rm -rf /app/hims
                     fi
-                    docker exec hims-demo cd /app && npm link && hims init --default && hims start
+                    docker exec hims-demo sh -c "cd /app && npm link && hims init --default && hims start"
                 '''
             }
         }
