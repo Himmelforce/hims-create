@@ -1,5 +1,7 @@
 pipeline {
-    agent development-node
+    agent {
+        label 'development-node'
+    }
     stages {
         stage('Prepare Docker in Docker') {
             steps {
