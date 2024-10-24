@@ -6,16 +6,14 @@ pipeline {
         stage('Prepare Docker in Docker') {
             steps {
                 def container = 'hims-demo'
-
                 sh """
                     if docker ps -a --format '{{.Names}}' | grep -q ${container}; then
                         docker rm -f ${container}
                     fi
                     docker run --privileged -d --name ${container} docker:dind \
                     --label "traefik.enable=true" \
-                    --label "traefik.http.routers.${container}.rule=Host(\`hims-demo.himmelforce.com\`)"
+                    --label "traefik.http.routers.${container}.rule=Host('hims-demo.himmelforce.com')"
                 """
-                
                 sh "docker exec ${container} apk add --no-cache nodejs npm docker-compose"
             }
         }
