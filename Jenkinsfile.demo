@@ -1,0 +1,18 @@
+pipeline {
+    agent development-node
+    stages {
+        stage('Prepare Docker in Docker') {
+            steps {
+                sh 'docker stop hims-demo'
+                sh 'docker rm hims-demo'
+                sh 'docker run --privileged -d --name hims-demo docker:dind --label "traefik.enable=true" --label "traefik.http.routers.hims-demo.rule=Host(`hims-demo.himmelforce.com`)"'
+                sh 'docker exec hims-demo apk add --no-cache nodejs npm docker-compose'
+            }
+        }
+        stage('Build hims-demo') {
+            steps {
+                sh 'docker exec hims-demo npm link && hims init --default && hims start'
+            }
+        }
+    }
+}
