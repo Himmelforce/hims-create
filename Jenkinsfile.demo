@@ -5,18 +5,23 @@ pipeline {
     stages {
         stage('Prepare Docker in Docker') {
             steps {
-                sh 'docker run --privileged -d --name hims-demo docker:dind --label "traefik.enable=true" --label "traefik.http.routers.hims-demo.rule=Host(`hims-demo.himmelforce.com`)"'
-                sh 'docker exec hims-demo apk add --no-cache nodejs npm docker-compose'
+                def container = 'hims-demo'
+
+                sh """
+                    if docker ps -a --format '{{.Names}}' | grep -q ${container}; then
+                        docker rm -f ${container}
+                    fi
+                    docker run --privileged -d --name ${container} docker:dind \
+                    --label "traefik.enable=true" \
+                    --label "traefik.http.routers.${container}.rule=Host(\`hims-demo.himmelforce.com\`)"
+                """
+                
+                sh "docker exec ${container} apk add --no-cache nodejs npm docker-compose"
             }
         }
-        stage('Deploy hims-demo') {
+        stage('Build hims-demo') {
             steps {
-                sh '''
-                    if docker exec hims-demo test -d /app/hims; then
-                        docker exec hims-demo rm -rf /app/hims
-                    fi
-                    docker exec hims-demo sh -c "cd /app && npm link && hims init --default && hims start"
-                '''
+                sh 'docker exec hims-demo npm link && hims init --default && hims start'
             }
         }
     }
