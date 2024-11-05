@@ -1,4 +1,4 @@
-![HiMS](baner.png)
+<p align="center"><img src="baner.png" /></p>
 
 # HiMS
 
