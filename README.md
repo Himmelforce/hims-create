@@ -1,4 +1,4 @@
-<p align="center"><img src="baner.png" /></p>
+<p align="center"><img src="baner.jpg" /></p>
 
 # HiMS
 
