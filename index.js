@@ -55,7 +55,6 @@ const copy = (src, dest, progress_bar) => {
 program.name("hims").description("Himmelforce Management System CLI tool").version(version)
 
 program
-  .command("init")
   .description("Initialize a new project")
   .option("-d, --default", "Use default configuration")
   .action(async options => {
