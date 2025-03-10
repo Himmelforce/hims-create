@@ -1,0 +1,19 @@
+ARG BUN_VERSION
+
+FROM oven/bun:${BUN_VERSION}
+
+RUN apt-get update && apt-get install -y curl
+
+WORKDIR /usr/src/app
+
+COPY package.json .
+
+RUN bun install
+
+COPY . .
+
+ARG FRONTEND_SERVICE_PORT
+
+EXPOSE ${FRONTEND_SERVICE_PORT}
+
+CMD ["bun", "run", "start:development"]

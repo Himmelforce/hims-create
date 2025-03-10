@@ -1,0 +1,20 @@
+ARG NODE_VERSION
+FROM node:${NODE_VERSION}-alpine
+
+RUN apk --no-cache add curl
+
+WORKDIR /usr/src/app
+
+COPY package.json .
+RUN npm install
+
+COPY . .
+RUN npm run build
+
+RUN chown -R node:node /usr/src/app
+
+ARG FRONTEND_SERVICE_PORT
+EXPOSE ${FRONTEND_SERVICE_PORT}
+
+USER node
+CMD ["npm", "run", "start:production"]

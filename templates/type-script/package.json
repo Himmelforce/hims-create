@@ -1,0 +1,9 @@
+{
+  "name": "hims",
+  "version": "1.0.0",
+  "main": "hims.js",
+  "bin": {
+    "hims": "./hims.js"
+  },
+  "author": ""
+}

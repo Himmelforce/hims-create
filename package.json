@@ -25,6 +25,8 @@
   },
   "homepage": "https://github.com/Himmelforce/HiMS#readme",
   "dependencies": {
+    "cli-progress": "^3.12.0",
+    "commander": "^13.1.0",
     "kolorist": "^1.8.0",
     "minimist": "^1.2.8",
     "prompts": "^2.4.0"
