@@ -112,7 +112,7 @@ program
     if (hims_cli_install_response.install) {
       console.log(yellow("Installing hims-cli..."))
       try {
-        execSync("npm install -g hims", { stdio: "inherit" })
+        execSync("npm i hims@latest -g", { stdio: "inherit" })
         console.log("hims-cli was installed globally successfully.")
       } catch (error) {
         console.error("Error installing hims-cli globally.")
