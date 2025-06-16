@@ -1,0 +1,236 @@
+services:
+  frontend:
+    container_name: hims-frontend
+    ports:
+      - target: ${FRONTEND_SERVICE_PORT}
+        published: ${FRONTEND_SERVICE_PORT}
+    build:
+      context: ./frontend
+      args:
+        FRONTEND_SERVICE_PORT: ${FRONTEND_SERVICE_PORT}
+        NODE_VERSION: ${NODE_VERSION}
+        BUN_VERSION: ${BUN_VERSION}
+        API_URL: ${API_URL}
+    env_file:
+      - .env
+      - .hims.env
+    environment:
+      - NEXT_PUBLIC_API_URL=${API_URL}
+    # TODO: Do proper healthcheck
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:${FRONTEND_SERVICE_PORT}/health"]
+    #   interval: 2s
+    #   timeout: 10s
+    #   retries: 20
+    #   start_period: 100s
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - default
+    restart: always
+
+  admin:
+    image: himmelforce/hims-admin:1.0.0-beta.1
+    container_name: hims-admin
+    ports:
+      - target: ${ADMIN_SERVICE_PORT}
+        published: ${ADMIN_SERVICE_PORT}
+    env_file:
+      - .env
+      - .hims.env
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${ADMIN_SERVICE_PORT}/"]
+      interval: 2s
+      timeout: 10s
+      retries: 20
+      start_period: 100s
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - default
+
+  api:
+    image: himmelforce/hims-api:1.0.0-beta.1
+    container_name: hims-api
+    ports:
+      - target: ${API_PORT}
+        published: ${API_PORT}
+    env_file:
+      - .env
+      - .hims.env
+    volumes:
+      - ./uploads:/app/uploads
+      - ./modules:/app/modules
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${API_PORT}/api/"]
+      interval: 2s
+      timeout: 10s
+      retries: 20
+      start_period: 100s
+    depends_on:
+      mongo-01-primary:
+        condition: service_healthy
+      mongo-02-secondary:
+        condition: service_started
+      mongo-03-secondary:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    networks:
+      - default
+      - mongo_network
+
+  mongo-01-primary:
+    container_name: "mongo-01-primary"
+    entrypoint: >
+      /bin/bash -c '
+      openssl rand -base64 756 > /shared/keyfile.key &&
+      chmod 400 /shared/keyfile.key &&
+      chown mongodb:mongodb /shared/keyfile.key &&
+      /usr/local/bin/docker-entrypoint.sh mongod --replSet rs0 --keyFile /shared/keyfile.key --bind_ip_all'
+    image: "mongo"
+    ports:
+      - target: 27017
+        published: 27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE}
+    volumes:
+      - "mongo-01-data:/data/db"
+      - "mongo-01-config:/data/configdb"
+      - "shared-config:/shared"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: >
+        /bin/sh -c "mongosh -u $${MONGO_INITDB_ROOT_USERNAME} -p $${MONGO_INITDB_ROOT_PASSWORD} --authenticationDatabase admin --eval \"
+        try {
+          rs.status()
+        } catch (err) {
+          rs.initiate({
+            _id: 'rs0',
+            members: [
+              { _id: 0, host: 'mongo-01-primary:27017', priority: 1 },
+              { _id: 1, host: 'mongo-02-secondary:27018', priority: 0.5 },
+              { _id: 2, host: 'mongo-03-secondary:27019', priority: 0.5 }
+            ]
+          })
+        }
+        \""
+      interval: 5s
+      timeout: 30s
+      retries: 30
+    networks:
+      - mongo_network
+    restart: unless-stopped
+
+  mongo-02-secondary:
+    container_name: "mongo-02-secondary"
+    image: "mongo"
+    env_file:
+      - .env
+      - .hims.env
+    ports:
+      - target: 27018
+        published: 27018
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - "mongo-02-data:/data/db"
+      - "mongo-02-config:/data/configdb"
+      - "shared-config:/shared"
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all", "--port", "27018", "--keyFile", "/shared/keyfile.key"]
+    networks:
+      - mongo_network
+    restart: unless-stopped
+
+  mongo-03-secondary:
+    container_name: "mongo-03-secondary"
+    image: "mongo"
+    env_file:
+      - .env
+      - .hims.env
+    ports:
+      - target: 27019
+        published: 27019
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - "mongo-03-data:/data/db"
+      - "mongo-03-config:/data/configdb"
+      - "shared-config:/shared"
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all", "--port", "27019", "--keyFile", "/shared/keyfile.key"]
+    networks:
+      - mongo_network
+    restart: unless-stopped
+
+  redis:
+    image: redis
+    container_name: hims-redis
+    ports:
+      - target: ${REDIS_PORT}
+        published: ${REDIS_PORT}
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    networks:
+      - default
+
+  traefik:
+    image: traefik:${TRAEFIK_VERSION}
+    container_name: hims-traefik
+    ports:
+      - target: 80
+        published: 80
+      - target: 443
+        published: 443
+      - target: 8080
+        published: 8080
+    volumes:
+      - "./traefik/traefik.yml:/etc/traefik/traefik.yml"
+      - "./traefik/dynamic.yml:/etc/traefik/dynamic.yml"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    depends_on:
+      api:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
+      admin:
+        condition: service_healthy
+
+volumes:
+  mongo-01-data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./mongo/mongo-01-data
+      o: bind
+  mongo-01-config:
+  mongo-02-data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./mongo/mongo-02-data
+      o: bind
+  mongo-02-config:
+  mongo-03-data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./mongo/mongo-03-data
+      o: bind
+  mongo-03-config:
+  shared-config:
+  uploads:
+    driver: local
+
+networks:
+  default:
+  mongo_network:

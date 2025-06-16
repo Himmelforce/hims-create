@@ -82,8 +82,7 @@ program
       name: "template",
       message: "Select a template:",
       choices: [
-        { title: "JavaScript", value: "java-script" },
-        { title: "TypeScript", value: "type-script" }
+        { title: "NextJS", value: "next-js" }
       ],
       initial: 0
     })

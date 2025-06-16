@@ -1,0 +1,38 @@
+FROM node:20.9.0-alpine AS builder
+
+RUN apk add --no-cache make gcc g++ python3
+
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+RUN npm ci
+
+COPY . .
+ARG API_URL
+ARG FRONTEND_SERVICE_PORT
+ENV NEXT_PUBLIC_FRONTEND_PORT=${FRONTEND_SERVICE_PORT}
+ENV NEXT_PUBLIC_API_URL=${API_URL}
+RUN npm run build
+
+FROM node:20.9.0-alpine AS runner
+
+WORKDIR /usr/src/app
+
+ARG FRONTEND_SERVICE_PORT
+ARG API_URL
+ENV NODE_ENV=production
+ENV PORT=${FRONTEND_SERVICE_PORT}
+ENV NEXT_PUBLIC_API_URL=${API_URL}
+
+COPY --from=builder /usr/src/app/.next/standalone ./
+COPY --from=builder /usr/src/app/.next/static   ./.next/static
+COPY --from=builder /usr/src/app/public         ./public
+COPY --from=builder /usr/src/app/sentry.edge.config.ts ./
+COPY --from=builder /usr/src/app/sentry.server.config.ts ./
+COPY --from=builder /usr/src/app/instrumentation-client.ts ./
+
+
+EXPOSE ${PORT}
+
+ENV HOSTNAME="0.0.0.0"
+CMD ["node", "server.js"]
